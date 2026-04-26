@@ -1,0 +1,69 @@
+name: Weekly Iron Condor Paper Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub cron uses UTC. These are approx 09:25, 12:30, 15:10 IST.
+    - cron: "55 3 * * 1-5"
+    - cron: "0 7 * * 1-5"
+    - cron: "40 9 * * 1-5"
+
+jobs:
+  paper-trade:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show running files
+        run: |
+          ls -la
+          echo "----- bot file head -----"
+          head -25 weekly_iron_condor_bot.py
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run weekly iron condor paper bot
+        env:
+          FYERS_CLIENT_ID: ${{ secrets.FYERS_CLIENT_ID }}
+          FYERS_ACCESS_TOKEN: ${{ secrets.FYERS_ACCESS_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+          # Bot settings
+          LOT_SIZE: "75"
+          STRIKE_STEP: "50"
+          STRIKECOUNT: "60"
+          WING_WIDTH: "100"
+          ENTRY_DTE_MIN: "2"
+          ENTRY_DTE_MAX: "6"
+
+          # Liquidity filters
+          MIN_VOLUME: "1000"
+          MAX_SPREAD_PCT: "12"
+          MAX_ABS_SPREAD: "25"
+
+          # Short strike selection
+          SELL_DELTA_MIN: "0.23"
+          SELL_DELTA_MAX: "0.30"
+          TARGET_DELTA: "0.25"
+          OTM_PCT_MIN: "0.010"
+          OTM_PCT_MAX: "0.022"
+
+          # Adjustment settings
+          TRIGGER_DISTANCE: "75"
+          RECENTER_MOVE: "250"
+          MAX_TOTAL_ADJUSTMENTS: "6"
+          MAX_ADJUSTMENTS_PER_DAY: "1"
+          SETTLE_AFTER_HOUR: "15"
+          SETTLE_AFTER_MINUTE: "20"
+
+        run: python weekly_iron_condor_bot.py
