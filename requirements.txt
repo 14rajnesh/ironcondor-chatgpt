@@ -1,0 +1,5 @@
+fyers-apiv3
+requests
+supabase
+python-dateutil
+pytz
